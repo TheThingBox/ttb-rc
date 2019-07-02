@@ -18,3 +18,6 @@ cp /root/.vim_runtime /home/pi/ -r
 curl "https://raw.githubusercontent.com/scopatz/nanorc/master/install.sh" | sh
 cp /root/.nanorc /home/pi/
 cp /root/.nano /home/pi/ -r
+
+# motd
+curl "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/motd" > /etc/motd

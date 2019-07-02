@@ -22,7 +22,7 @@ fi
 #######################################################
 
 # Disable the bell
-if [[ $iatest > 0 ]]; then bind "set bell-style visible"; fi
+if [[ $iatest > 0 ]]; then bind "set bell-style none"; fi
 
 # Expand the history size
 export HISTFILESIZE=10000

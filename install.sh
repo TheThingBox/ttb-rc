@@ -3,7 +3,7 @@
 cd /root
 
 # bashrc
-curl -h "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/.bashrc" > /root/.bashrc
+curl "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/.bashrc" > /root/.bashrc
 chmod 644 /root/.bashrc
 cp /root/.bashrc /home/pi/
 
@@ -15,6 +15,6 @@ cp /root/.vimrc /home/pi/
 cp /root/.vim_runtime /home/pi/ -r
 
 # nanorc
-curl https://raw.githubusercontent.com/scopatz/nanorc/master/install.sh | sh
+curl "https://raw.githubusercontent.com/scopatz/nanorc/master/install.sh" | sh
 cp /root/.nanorc /home/pi/
 cp /root/.nano /home/pi/ -r

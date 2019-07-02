@@ -640,54 +640,61 @@ function __setprompt
 	fi
 
 	# Date
-	PS1+="\[${DARKGRAY}\](\[${CYAN}\]\$(date +%a) $(date +%b-'%-m')" # Date
-	PS1+="${CYAN} $(date +'%-I':%M:%S%P)\[${DARKGRAY}\])-" # Time
+	PS1+="\[${DARKGRAY}\](\[${CYAN}\]$(date +'%d-%m-%y')" # Date
+	PS1+="${CYAN} $(date +'%T %:::z')\[${DARKGRAY}\])-" # Time
 
 	# CPU
-	PS1+="(\[${MAGENTA}\]CPU $(cpu)%"
+	PS1+="(\[${CYAN}\]CPU $(cpu)%"
 
 	# Jobs
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]\j"
+	# PS1+="\[${DARKGRAY}\]:\[${CYAN}\]\j"
 
 	# Mem
 	local MEM_FREE=`free | grep Mem | awk '{printf("%2.1f", 100-(($4+$6)/$2*100.0));}'`
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]Mem $MEM_FREE%"
+	PS1+="\[${DARKGRAY}\]:\[${CYAN}\]Mem $MEM_FREE%"
 
 	# Network Connections (for a server - comment out for non-server)
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]Net $(awk 'END {print NR}' /proc/net/tcp)"
+	# PS1+="\[${DARKGRAY}\]:\[${CYAN}\]Net $(awk 'END {print NR}' /proc/net/tcp)"
 
-	PS1+="\[${DARKGRAY}\])-"
+	PS1+="\[${DARKGRAY}\])-"	
+
+	# Keyboard layout
+	local KEYBOARD_LAYOUT=`localectl status | grep -i 'x11 layout' | awk '{printf("%s", $3)}'`
+	PS1+="\[${DARKGRAY}\](\[${LIGHTGRAY}\]keyboard $KEYBOARD_LAYOUT\[${DARKGRAY}\])-"
 
 	# User and server
-	local SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`
-	local SSH2_IP=`echo $SSH2_CLIENT | awk '{ print $1 }'`
+	# local SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`
+	# local SSH2_IP=`echo $SSH2_CLIENT | awk '{ print $1 }'`
 	local SSH3_IP=`hostname -I | awk '{printf("%s",$1)}'`
-	if [ $SSH2_IP ] || [ $SSH_IP ] ; then
+	# if [ $SSH2_IP ] || [ $SSH_IP ] ; then
 		if [ $SSH3_IP ] ; then
-			PS1+="(\[${RED}\]$SSH3_IP\[${DARKGRAY}\])-(\[${RED}\]\u@\h"
+			PS1+="(\[${LIGHTGRAY}\]$SSH3_IP \u@\h\[${DARKGRAY}\])"
 		else
-			PS1+="(\[${RED}\]\u@\h"
+			PS1+="(\[${LIGHTGRAY}\]\u@\h\[${DARKGRAY}\])"
 		fi
-	else
-		PS1+="(\[${RED}\]\u"
-	fi
+	# else
+	# 	PS1+="(\[${LIGHTGRAY}\]\u\[${DARKGRAY}\])"
+	# fi
 
-	# Current directory
-	PS1+="\[${DARKGRAY}\]:\[${BROWN}\]\w\[${DARKGRAY}\])-"
+	# Skip to the next line
+	PS1+="\n"
 
 	# Total size of files in current directory
 	PS1+="(\[${GREEN}\]$(/bin/ls -lah | /bin/grep -m 1 total | /bin/sed 's/total //')\[${DARKGRAY}\]:"
 
 	# Number of files
-	PS1+="\[${GREEN}\]\$(/bin/ls -A -1 | /usr/bin/wc -l)\[${DARKGRAY}\])"
+	PS1+="\[${GREEN}\]$(/bin/ls -A -1 | /usr/bin/wc -l)\[${DARKGRAY}\])"
+
+	# Current directory
+	PS1+=" \[${BROWN}\]$(pwd)"
 
 	# Skip to the next line
 	PS1+="\n"
 
 	if [[ $EUID -ne 0 ]]; then
-		PS1+="\[${GREEN}\]>\[${NOCOLOR}\] " # Normal user
+		PS1+="\[${LIGHTGRAY}\]>\[${NOCOLOR}\] " # Normal user
 	else
-		PS1+="\[${RED}\]>\[${NOCOLOR}\] " # Root user
+		PS1+="\[${GREEN}\]>\[${NOCOLOR}\] " # Root user
 	fi
 
 	# PS2 is used to continue a command using the \ character

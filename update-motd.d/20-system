@@ -48,13 +48,19 @@ users=$(users | wc -w)
 swap_usage=$(free -m | ( awk '/Swap/ { printf("%3.0f", $3/$2*100) }' 2>/dev/null || echo 0 ) | sed 's/ //g')
 swap_usage=${swap_usage//[!0-9]/} # to remove alfanumeric if swap not used
 swap_total=$(free -m |  awk '/Swap/ {print $(2)}')
-ip_address=$(sleep 1 && hostname -I | tr " " "\n" | grep -E "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" | tail -n2 | tr "\n" " ")
-ip_address=$(echo $ip_address | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sed 's/ /,/g')
+ip_address=$(hostname -I | awk '{printf("%s",$1)}')
 root_usage=$(df -h / | awk '/\// {print $(NF-1)}' | sed 's/%//g')
 root_total=$(df -h / | awk '/\// {print $(NF-4)}')
 
 if [ -d "/sys/class/thermal/thermal_zone0" ]; then
   board_temp=$(awk '{printf("%.1f",$1/1000)}' </sys/class/thermal/thermal_zone0/temp)
+fi
+
+docker_container=""
+docker_images=""
+if [ -x "$(command -v docker)" ] ; then
+  docker_containers=$(docker ps --filter "status=running" --format "{{.Names}}" | wc -l)
+  docker_images=$(docker images --format "{{.ID}}" | wc -l)
 fi
 
 display "System load" "$load" "1" "0" "" "" "2"
@@ -69,5 +75,10 @@ display "Usage of /" "$root_usage" "90" "1" "%" " of $root_total"
 echo "" # fixed newline
 display "Memory usage" "$memory_usage" "70" "0" "%" " of $memory_total""Mb" "2"
 display "Swap usage" "$swap_usage" "10" "0" "%" " of $swap_total""Mb"
+if ! [ -z "$docker_images" ] ; then
+  echo "" # fixed newline
+  display "Docker image" "$docker_images" "15" "0" "" "" "2"
+  display "Container" "$docker_containers" "15" "0" "" " running"
+fi
 echo "" # fixed newline
 echo "" # fixed newline

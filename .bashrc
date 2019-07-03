@@ -671,8 +671,7 @@ function __setprompt
     # User and server
     # local SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`
     # local SSH2_IP=`echo $SSH2_CLIENT | awk '{ print $1 }'`
-    local ip_address=$(hostname -I | tr " " "\n" | grep -E "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" | tail -n2 | tr "\n" " ")
-    ip_address=$(echo $ip_address | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sed 's/ /,/g')
+    local ip_address=$(hostname -I | awk '{printf("%s",$1)}')
     # if [ $SSH2_IP ] || [ $SSH_IP ] ; then
         if [ $ip_address ] ; then
             PS1+="(\[${LIGHTGRAY}\]$ip_address \u@\h\[${DARKGRAY}\])"

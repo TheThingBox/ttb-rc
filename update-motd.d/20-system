@@ -1,0 +1,73 @@
+#!/bin/bash
+# source : FrendlyElec
+
+function displaytime {
+  # we need dedicated function
+  local T=$(cat /proc/uptime | awk '{print $1}' | sed 's/[.].*//')
+  local D=$((T/60/60/24))
+  local H=$((T/60/60%24))
+  local M=$((T/60%60))
+  local S=$((T%60))
+  local time=$S
+  time=$S" sec"
+  (( $M > 0 )) && time=$M" min"
+  (( $H > 0 )) && time=$H" hour"
+  (( $H > 1 )) && time=$H" hours"
+  (( $D > 0 )) && time=$D" day"
+  (( $D > 1 )) && time=$D" days"
+  printf "Up time:       "
+  printf "\x1B[92m%s\x1B[0m\t\t" "$time"
+}
+
+function display() {
+  # $1=name $2=value $3=red_limit $4=minimal_show_limit $5=unit $6=after $7=tabs{
+  if [[ (( "${2%.*}" -ge "$4" )) ]]; then
+    printf "%-14s%s" "$1:"
+    if (( $(echo "$2 > $3" | bc -l) )); then
+      echo -ne "\e[0;91m $2"; else echo -ne "\e[0;92m $2";
+    fi
+    printf "%-1s%s\x1B[0m" "$5"
+    printf "%-11s%s" "$6"
+    if [[ -n $7 && $7 > 0 ]]; then
+      for (( c=1; c<=$7; c++)) ; do printf "\t" ; done
+    fi
+    return 1
+  fi
+}
+
+load=$(cat /proc/loadavg | awk '{print $1}')
+# workaround that it works on old and new
+free -w &> /dev/null
+if [[ $? -ne 0 ]]; then
+  memory_usage=$(free | awk '/Mem/ {printf("%.1f",(($2-($4+$6+$7))/$2) * 100)}')
+else
+  memory_usage=$(free -w | awk '/Mem/ {printf("%.1f",(($2-($4+$6+$7))/$2) * 100)}')
+fi
+memory_total=$(free -m |  awk '/Mem/ {print $(2)}')
+users=$(users | wc -w)
+swap_usage=$(free -m | ( awk '/Swap/ { printf("%3.0f", $3/$2*100) }' 2>/dev/null || echo 0 ) | sed 's/ //g')
+swap_usage=${swap_usage//[!0-9]/} # to remove alfanumeric if swap not used
+swap_total=$(free -m |  awk '/Swap/ {print $(2)}')
+ip_address=$(sleep 1 && hostname -I | tr " " "\n" | grep -E "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" | tail -n2 | tr "\n" " ")
+ip_address=$(echo $ip_address | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sed 's/ /,/g')
+root_usage=$(df -h / | awk '/\// {print $(NF-1)}' | sed 's/%//g')
+root_total=$(df -h / | awk '/\// {print $(NF-4)}')
+
+if [ -d "/sys/class/thermal/thermal_zone0" ]; then
+  board_temp=$(awk '{printf("%.1f",$1/1000)}' </sys/class/thermal/thermal_zone0/temp)
+fi
+
+display "System load" "$load" "1" "0" "" "" "2"
+displaytime
+echo "" # fixed newline
+printf "IP:            "
+printf "\x1B[92m%s\x1B[0m\t\t" "$ip_address"
+display "Local users" "$users" "3" "2" "" ""
+echo "" # fixed newline
+display "CPU temp" "$board_temp" "45" "0" "°C" "" "1"
+display "Usage of /" "$root_usage" "90" "1" "%" " of $root_total"
+echo "" # fixed newline
+display "Memory usage" "$memory_usage" "70" "0" "%" " of $memory_total""Mb" "2"
+display "Swap usage" "$swap_usage" "10" "0" "%" " of $swap_total""Mb"
+echo "" # fixed newline
+echo "" # fixed newline

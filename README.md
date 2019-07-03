@@ -14,4 +14,3 @@ curl https://raw.githubusercontent.com/thethingbox/ttb-rc/master/install.sh | sh
  - [nanorc](https://github.com/scopatz/nanorc)
  - [vimrc](https://github.com/amix/vimrc)
 
- - [ASCII banner](http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=FUNDATRIX)

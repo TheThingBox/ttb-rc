@@ -2,6 +2,8 @@
 
 cd /root
 
+apt-get install -yq toilet figlet bc
+
 # bashrc
 curl "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/.bashrc" > /root/.bashrc
 chmod 644 /root/.bashrc
@@ -20,4 +22,7 @@ cp /root/.nanorc /home/pi/
 cp /root/.nano /home/pi/ -r
 
 # motd
-curl "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/motd" > /etc/motd
+rm /etc/motd
+curl "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/update-motd.d/10-header" > /etc/update-motd.d/10-header
+curl "https://raw.githubusercontent.com/TheThingBox/ttb-rc/master/update-motd.d/20-system" > /etc/update-motd.d/20-system
+chmod +x /etc/update-motd.d/*
